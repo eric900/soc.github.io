@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Safety Observation System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .admin-panel {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+        }
+        
+        .form-card {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            flex: 1;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 25px;
+            text-align: center;
+            font-size: 1.8em;
+            font-weight: 600;
+        }
+        
+        h2 {
+            color: #34495e;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+            font-weight: 500;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+        
+        input, textarea, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e6ed;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.9);
+        }
+        
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 14px 28px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 10px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
+            margin-bottom: 10px;
+        }
+        
+        .qr-container {
+            text-align: center;
+            margin: 20px 0;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #28a745;
+        }
+        
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #dc3545;
+        }
+        
+        .email-list {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+        
+        .email-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px 0;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .email-item:last-child {
+            border-bottom: none;
+        }
+        
+        .remove-email {
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            padding: 2px 6px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .form-card, .admin-panel {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 1.5em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Admin Panel -->
+        <div id="admin-panel" class="admin-panel">
+            <h2>🛠️ System Configuration</h2>
+            
+            <div class="form-group">
+                <label for="email-input">Add Email Address:</label>
+                <input type="email" id="email-input" placeholder="Enter email address">
+                <button class="btn btn-secondary" onclick="addEmail()">Add Email</button>
+            </div>
+            
+            <div id="email-list" class="email-list hidden">
+                <strong>Recipients:</strong>
+                <div id="email-items"></div>
+            </div>
+            
+            <button class="btn" onclick="generateQRCode()">Generate QR Code</button>
+            
+            <div id="qr-container" class="qr-container hidden">
+                <h3>🔗 QR Code for Safety Observation</h3>
+                <div id="qr-code"></div>
+                <p style="margin-top: 15px; color: #666; font-size: 14px;">
+                    Print this QR code and display it in your workplace.<br>
+                    Employees can scan it to report safety observations.
+                </p>
+            </div>
+        </div>
+
+        <!-- Safety Observation Form -->
+        <div id="safety-form" class="form-card hidden">
+            <h1>🛡️ Safety Observation</h1>
+            
+            <form id="observation-form">
+                <div class="form-group">
+                    <label for="location">📍 Location:</label>
+                    <input type="text" id="location" name="location" required 
+                           placeholder="e.g., Workshop A, Loading Dock, Office Floor 2">
+                </div>
+                
+                <div class="form-group">
+                    <label for="observation-type">⚠️ Type of Observation:</label>
+                    <select id="observation-type" name="observation-type" required>
+                        <option value="">Select type...</option>
+                        <option value="near-miss">Near Miss</option>
+                        <option value="unsafe-behavior">Unsafe Behavior</option>
+                        <option value="unsafe-condition">Unsafe Condition</option>
+                        <option value="safety-suggestion">Safety Suggestion</option>
+                        <option value="positive-observation">Positive Safety Observation</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="description">📝 Description:</label>
+                    <textarea id="description" name="description" required 
+                              placeholder="Please provide detailed information about what you observed, including any immediate actions taken..."></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="reporter">👤 Reporter Name:</label>
+                    <input type="text" id="reporter" name="reporter" required 
+                           placeholder="Your name (optional: can be anonymous)">
+                </div>
+                
+                <button type="submit" class="btn">Submit Safety Observation</button>
+            </form>
+            
+            <div id="message-container"></div>
+        </div>
+    </div>
+
+    <script>
+        // Fallback QR code generation using Google Charts API
+        function generateQRCodeFallback(text, container) {
+            const img = document.createElement('img');
+            img.src = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(text)}`;
+            img.style.maxWidth = '100%';
+            img.style.height = 'auto';
+            img.alt = 'QR Code for Safety Observation';
+            container.innerHTML = '';
+            container.appendChild(img);
+        }
+    </script>
+    
+    <!-- Include QR Code library with fallback -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.3/qrcode.min.js" 
+            onerror="console.log('QR library failed to load, will use fallback')"></script>
+
+    <script>
+        let emailList = [];
+        
+        // Check if this is accessed via QR code (has form parameter)
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('form') === 'safety') {
+            document.getElementById('admin-panel').style.display = 'none';
+            document.getElementById('safety-form').classList.remove('hidden');
+        }
+        
+        function addEmail() {
+            const emailInput = document.getElementById('email-input');
+            const email = emailInput.value.trim();
+            
+            if (!email) {
+                showMessage('Please enter an email address', 'error');
+                return;
+            }
+            
+            if (!isValidEmail(email)) {
+                showMessage('Please enter a valid email address', 'error');
+                return;
+            }
+            
+            if (emailList.includes(email)) {
+                showMessage('Email address already added', 'error');
+                return;
+            }
+            
+            emailList.push(email);
+            emailInput.value = '';
+            updateEmailList();
+            showMessage('Email added successfully', 'success');
+        }
+        
+        function removeEmail(email) {
+            emailList = emailList.filter(e => e !== email);
+            updateEmailList();
+            showMessage('Email removed', 'success');
+        }
+        
+        function updateEmailList() {
+            const emailListDiv = document.getElementById('email-list');
+            const emailItemsDiv = document.getElementById('email-items');
+            
+            if (emailList.length === 0) {
+                emailListDiv.classList.add('hidden');
+                return;
+            }
+            
+            emailListDiv.classList.remove('hidden');
+            emailItemsDiv.innerHTML = emailList.map(email => 
+                `<div class="email-item">
+                    <span>${email}</span>
+                    <button class="remove-email" onclick="removeEmail('${email}')">Remove</button>
+                </div>`
+            ).join('');
+        }
+        
+        function generateQRCode() {
+            if (emailList.length === 0) {
+                showMessage('Please add at least one email address first', 'error');
+                return;
+            }
+            
+            const currentUrl = window.location.href.split('?')[0];
+            const qrUrl = `${currentUrl}?form=safety&emails=${encodeURIComponent(emailList.join(','))}`;
+            
+            const qrContainer = document.getElementById('qr-container');
+            const qrCodeDiv = document.getElementById('qr-code');
+            
+            // Clear previous QR code
+            qrCodeDiv.innerHTML = 'Generating QR code...';
+            
+            // Try to use the QRCode library first
+            if (typeof QRCode !== 'undefined') {
+                try {
+                    QRCode.toCanvas(qrCodeDiv, qrUrl, {
+                        width: 300,
+                        height: 300,
+                        colorDark: '#2c3e50',
+                        colorLight: '#ffffff',
+                        correctLevel: QRCode.CorrectLevel.M
+                    }, function (error) {
+                        if (error) {
+                            console.log('QRCode library error:', error);
+                            generateQRCodeFallback(qrUrl, qrCodeDiv);
+                        } else {
+                            qrContainer.classList.remove('hidden');
+                            showMessage('QR code generated successfully!', 'success');
+                        }
+                    });
+                } catch (e) {
+                    console.log('QRCode library exception:', e);
+                    generateQRCodeFallback(qrUrl, qrCodeDiv);
+                }
+            } else {
+                // Fallback to online QR generator
+                console.log('QRCode library not available, using fallback');
+                generateQRCodeFallback(qrUrl, qrCodeDiv);
+            }
+            
+            // Always show the container
+            qrContainer.classList.remove('hidden');
+            
+            // Show success message after a short delay to ensure QR code is generated
+            setTimeout(() => {
+                showMessage('QR code generated successfully!', 'success');
+            }, 500);
+        }
+        
+        function isValidEmail(email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
+        }
+        
+        function showMessage(message, type) {
+            const messageContainer = document.getElementById('message-container');
+            const messageClass = type === 'error' ? 'error-message' : 'success-message';
+            
+            messageContainer.innerHTML = `<div class="${messageClass}">${message}</div>`;
+            
+            setTimeout(() => {
+                messageContainer.innerHTML = '';
+            }, 5000);
+        }
+        
+        // Handle safety observation form submission
+        document.getElementById('observation-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const data = {
+                location: formData.get('location'),
+                type: formData.get('observation-type'),
+                description: formData.get('description'),
+                reporter: formData.get('reporter') || 'Anonymous',
+                timestamp: new Date().toLocaleString(),
+                submittedFrom: window.location.hostname
+            };
+            
+            // Get email addresses from URL parameter
+            const emailParam = urlParams.get('emails');
+            if (!emailParam) {
+                showMessage('No recipient emails configured. Please contact your administrator.', 'error');
+                return;
+            }
+            
+            const emails = emailParam.split(',');
+            
+            // Create email content
+            const emailSubject = `Safety Observation Report - ${data.type}`;
+            const emailBody = `
+Safety Observation Report
+
+Location: ${data.location}
+Type: ${data.type}
+Reporter: ${data.reporter}
+Submitted: ${data.timestamp}
+
+Description:
+${data.description}
+
+This report was submitted via the Safety Observation QR Code system.
+            `.trim();
+            
+            // Create mailto links for each email
+            const mailtoLinks = emails.map(email => 
+                `mailto:${email.trim()}?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`
+            );
+            
+            // Open email client for first email
+            if (mailtoLinks.length > 0) {
+                window.location.href = mailtoLinks[0];
+                
+                // If multiple emails, show instructions
+                if (mailtoLinks.length > 1) {
+                    showMessage(`Email opened for ${emails[0].trim()}. Please send similar emails to: ${emails.slice(1).join(', ')}`, 'success');
+                } else {
+                    showMessage('Email client opened. Please send the safety observation report.', 'success');
+                }
+                
+                // Reset form
+                this.reset();
+            }
+        });
+        
+        // Allow Enter key to add email
+        document.getElementById('email-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                addEmail();
+            }
+        });
+    </script>
+</body>
+</html>
