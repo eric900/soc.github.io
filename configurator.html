@@ -1,1 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Safety Observation - Admin Panel</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+        }
+        
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 25px;
+            text-align: center;
+            font-size: 2em;
+            font-weight: 600;
+        }
+        
+        h2 {
+            color: #34495e;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+            font-weight: 500;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+        
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e6ed;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.9);
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 14px 28px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 10px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
+            margin-bottom: 10px;
+        }
+        
+        .qr-container {
+            text-align: center;
+            margin: 30px 0;
+            padding: 25px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            border: 2px dashed #667eea;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #28a745;
+        }
+        
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #dc3545;
+        }
+        
+        .email-list {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+        
+        .email-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .email-item:last-child {
+            border-bottom: none;
+        }
+        
+        .remove-email {
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 4px 8px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        
+        .instructions {
+            background: #e3f2fd;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 25px 0;
+            border-left: 4px solid #2196f3;
+        }
+        
+        .instructions h3 {
+            color: #1565c0;
+            margin-bottom: 10px;
+        }
+        
+        .instructions ol {
+            color: #424242;
+            padding-left: 20px;
+        }
+        
+        .instructions li {
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🛡️ Safety Observation System</h1>
+        <h2>Admin Configuration Panel</h2>
+        
+        <div class="form-group">
+            <label for="email-input">📧 Add Recipient Email Address:</label>
+            <input type="email" id="email-input" placeholder="Enter email address (e.g., safety@company.com)">
+            <button class="btn btn-secondary" onclick="addEmail()">Add Email</button>
+        </div>
+        
+        <div id="email-list" class="email-list hidden">
+            <strong>📋 Current Recipients:</strong>
+            <div id="email-items"></div>
+        </div>
+        
+        <button class="btn" onclick="generateQRCode()">🔗 Generate QR Code</button>
+        
+        <div id="qr-container" class="qr-container hidden">
+            <h3>📱 QR Code for Safety Observation</h3>
+            <div id="qr-code"></div>
+            <p style="margin-top: 20px; color: #666; font-size: 14px; line-height: 1.5;">
+                <strong>Instructions:</strong><br>
+                1. Print this QR code<br>
+                2. Display it in your workplace<br>
+                3. Employees scan it to report safety observations<br>
+                4. Reports will be emailed to the addresses above
+            </p>
+        </div>
+        
+        <div class="instructions">
+            <h3>ℹ️ How It Works</h3>
+            <ol>
+                <li>Add email addresses that should receive safety reports</li>
+                <li>Generate and print the QR code</li>
+                <li>Post the QR code in your workplace</li>
+                <li>When scanned, employees see a form to report safety observations</li>
+                <li>Completed forms are emailed directly to your specified addresses</li>
+            </ol>
+        </div>
+        
+        <div id="message-container"></div>
+    </div>
 
+    <script>
+        // Fallback QR code generation using online service
+        function generateQRCodeFallback(text, container) {
+            const img = document.createElement('img');
+            img.src = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(text)}`;
+            img.style.maxWidth = '100%';
+            img.style.height = 'auto';
+            img.style.border = '2px solid #667eea';
+            img.style.borderRadius = '8px';
+            img.alt = 'QR Code for Safety Observation';
+            container.innerHTML = '';
+            container.appendChild(img);
+        }
+    </script>
+    
+    <!-- Include QR Code library with fallback -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.3/qrcode.min.js" 
+            onerror="console.log('QR library failed to load, will use fallback')"></script>
+
+    <script>
+        let emailList = [];
+        
+        function addEmail() {
+            const emailInput = document.getElementById('email-input');
+            const email = emailInput.value.trim();
+            
+            if (!email) {
+                showMessage('Please enter an email address', 'error');
+                return;
+            }
+            
+            if (!isValidEmail(email)) {
+                showMessage('Please enter a valid email address', 'error');
+                return;
+            }
+            
+            if (emailList.includes(email)) {
+                showMessage('Email address already added', 'error');
+                return;
+            }
+            
+            emailList.push(email);
+            emailInput.value = '';
+            updateEmailList();
+            showMessage('Email added successfully!', 'success');
+        }
+        
+        function removeEmail(email) {
+            emailList = emailList.filter(e => e !== email);
+            updateEmailList();
+            showMessage('Email removed', 'success');
+        }
+        
+        function updateEmailList() {
+            const emailListDiv = document.getElementById('email-list');
+            const emailItemsDiv = document.getElementById('email-items');
+            
+            if (emailList.length === 0) {
+                emailListDiv.classList.add('hidden');
+                return;
+            }
+            
+            emailListDiv.classList.remove('hidden');
+            emailItemsDiv.innerHTML = emailList.map(email => 
+                `<div class="email-item">
+                    <span>📧 ${email}</span>
+                    <button class="remove-email" onclick="removeEmail('${email}')">Remove</button>
+                </div>`
+            ).join('');
+        }
+        
+        function generateQRCode() {
+            if (emailList.length === 0) {
+                showMessage('Please add at least one email address first', 'error');
+                return;
+            }
+            
+            // Point to the main GitHub Pages URL (index.html)
+            const formUrl = `https://eric900.github.io/soc.github.io/?emails=${encodeURIComponent(emailList.join(','))}`;
+            
+            const qrContainer = document.getElementById('qr-container');
+            const qrCodeDiv = document.getElementById('qr-code');
+            
+            // Show loading message
+            qrCodeDiv.innerHTML = '<p style="color: #667eea; font-weight: 500;">Generating QR code...</p>';
+            
+            // Try to use the QRCode library first
+            if (typeof QRCode !== 'undefined') {
+                try {
+                    QRCode.toCanvas(qrCodeDiv, formUrl, {
+                        width: 300,
+                        height: 300,
+                        colorDark: '#2c3e50',
+                        colorLight: '#ffffff',
+                        correctLevel: QRCode.CorrectLevel.M
+                    }, function (error) {
+                        if (error) {
+                            console.log('QRCode library error:', error);
+                            generateQRCodeFallback(formUrl, qrCodeDiv);
+                        }
+                        qrContainer.classList.remove('hidden');
+                        showMessage('QR code generated successfully! Ready to print and display.', 'success');
+                    });
+                } catch (e) {
+                    console.log('QRCode library exception:', e);
+                    generateQRCodeFallback(formUrl, qrCodeDiv);
+                    qrContainer.classList.remove('hidden');
+                    showMessage('QR code generated successfully! Ready to print and display.', 'success');
+                }
+            } else {
+                // Fallback to online QR generator
+                console.log('QRCode library not available, using fallback');
+                generateQRCodeFallback(formUrl, qrCodeDiv);
+                qrContainer.classList.remove('hidden');
+                showMessage('QR code generated successfully! Ready to print and display.', 'success');
+            }
+        }
+        
+        function isValidEmail(email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
+        }
+        
+        function showMessage(message, type) {
+            const messageContainer = document.getElementById('message-container');
+            const messageClass = type === 'error' ? 'error-message' : 'success-message';
+            
+            messageContainer.innerHTML = `<div class="${messageClass}">${message}</div>`;
+            
+            setTimeout(() => {
+                messageContainer.innerHTML = '';
+            }, 5000);
+        }
+        
+        // Allow Enter key to add email
+        document.getElementById('email-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                addEmail();
+            }
+        });
+    </script>
+</body>
+</html>
